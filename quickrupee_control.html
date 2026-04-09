@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickRupee — Loan Application</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px 16px 40px; }
+
+  .phone { width: 100%; max-width: 400px; background: #fff; border-radius: 20px; box-shadow: 0 4px 24px rgba(0,0,0,0.10); overflow: hidden; }
+
+  .status-bar { background: #1a1a2e; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .status-bar span { color: #fff; font-size: 12px; }
+  .secure { color: #aaa; font-size: 11px; }
+
+  .app-header { padding: 14px 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 10px; }
+  .logo { width: 36px; height: 36px; border-radius: 8px; background: #1a1a2e; display: flex; align-items: center; justify-content: center; color: #4da6ff; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .app-name { font-size: 15px; font-weight: 600; color: #1a1a2e; }
+  .app-sub { font-size: 11px; color: #888; }
+  .badge-rbi { background: #eaf3de; color: #3b6d11; font-size: 10px; padding: 3px 8px; border-radius: 10px; margin-left: auto; flex-shrink: 0; font-weight: 500; }
+
+  .progress-bar { padding: 10px 16px 4px; }
+  .progress-label { font-size: 11px; color: #888; margin-bottom: 4px; }
+  .progress-track { height: 4px; background: #eee; border-radius: 2px; }
+  .progress-fill { height: 4px; background: #1a1a2e; border-radius: 2px; transition: width 0.4s; }
+
+  .kfs-box { margin: 14px; background: #eaf3de; border: 1px solid #c0dd97; border-radius: 10px; padding: 12px; }
+  .kfs-title { font-size: 10px; font-weight: 700; color: #3b6d11; margin-bottom: 8px; letter-spacing: 0.8px; text-transform: uppercase; }
+  .kfs-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #c0dd97; }
+  .kfs-row:last-child { border-bottom: none; }
+  .kfs-label { font-size: 12px; color: #555; }
+  .kfs-value { font-size: 12px; font-weight: 600; color: #1a1a2e; }
+  .cooling { font-size: 11px; color: #3b6d11; margin-top: 8px; padding-top: 8px; border-top: 1px solid #c0dd97; line-height: 1.5; }
+
+  .section { padding: 14px 16px; border-bottom: 1px solid #f5f5f5; }
+  .section-title { font-size: 13px; font-weight: 600; color: #1a1a2e; margin-bottom: 10px; }
+  .helper { font-size: 11px; color: #888; margin-top: 6px; line-height: 1.5; }
+
+  .amount-display { font-size: 32px; font-weight: 700; color: #1a1a2e; text-align: center; padding: 8px 0 4px; }
+  input[type=range] { width: 100%; accent-color: #1a1a2e; margin: 6px 0; cursor: pointer; }
+  .range-labels { display: flex; justify-content: space-between; font-size: 11px; color: #aaa; }
+
+  .tenure-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .tenure-opt { border: 1.5px solid #e0e0e0; border-radius: 8px; padding: 10px; text-align: center; font-size: 13px; cursor: pointer; color: #444; transition: all 0.15s; user-select: none; }
+  .tenure-opt:hover { border-color: #aaa; }
+  .tenure-opt.selected { border-color: #1a1a2e; background: #e6f1fb; color: #1a1a2e; font-weight: 600; }
+
+  .cost-box { margin: 0 14px 14px; background: #f9f9f9; border-radius: 10px; padding: 12px; }
+  .cost-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eee; }
+  .cost-row:last-child { border-bottom: none; font-weight: 600; }
+  .cost-label { font-size: 13px; color: #666; }
+  .cost-value { font-size: 13px; color: #1a1a2e; }
+
+  .insurance-box { margin: 0 14px 14px; border: 1px solid #e8e8e8; border-radius: 10px; padding: 14px; }
+  .ins-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .ins-icon { width: 32px; height: 32px; border-radius: 8px; background: #e6f1fb; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .ins-title { font-size: 13px; font-weight: 600; color: #1a1a2e; }
+  .ins-sub { font-size: 11px; color: #888; }
+  .ins-price { font-size: 12px; color: #666; margin-bottom: 10px; }
+  .checkbox-row { display: flex; align-items: flex-start; gap: 8px; cursor: pointer; margin-bottom: 6px; }
+  .checkbox-row input[type=checkbox] { margin-top: 2px; width: 16px; height: 16px; cursor: pointer; accent-color: #1a1a2e; flex-shrink: 0; }
+  .checkbox-label { font-size: 13px; color: #333; line-height: 1.4; }
+
+  .cta-area { padding: 14px 16px 20px; }
+  .cta-btn { width: 100%; padding: 15px; background: #1a1a2e; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
+  .cta-btn:hover { opacity: 0.9; }
+  .cta-btn:active { opacity: 0.8; }
+  .cta-note { font-size: 11px; color: #888; text-align: center; margin-top: 8px; line-height: 1.5; }
+
+  /* Confirmation screen */
+  .confirm-screen { display: none; padding: 20px 16px; text-align: center; }
+  .confirm-icon { font-size: 48px; margin-bottom: 12px; }
+  .confirm-title { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
+  .confirm-sub { font-size: 13px; color: #666; line-height: 1.6; margin-bottom: 20px; }
+  .confirm-table { width: 100%; text-align: left; border-collapse: collapse; margin-bottom: 20px; }
+  .confirm-table td { padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+  .confirm-table td:last-child { text-align: right; font-weight: 600; color: #1a1a2e; }
+  .confirm-table td:first-child { color: #666; }
+  .submit-btn { width: 100%; padding: 15px; background: #1a1a2e; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
+  .cancel-btn { width: 100%; padding: 13px; background: transparent; color: #666; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 14px; cursor: pointer; }
+
+  /* Submitted screen */
+  .submitted-screen { display: none; padding: 40px 20px; text-align: center; }
+  .submitted-icon { font-size: 56px; margin-bottom: 16px; }
+  .submitted-title { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
+  .submitted-sub { font-size: 13px; color: #666; line-height: 1.6; }
+
+  /* Confidence slider */
+  .conf-label { display: flex; justify-content: space-between; font-size: 11px; color: #aaa; margin-top: 4px; }
+  .conf-value { font-size: 20px; font-weight: 700; color: #1a1a2e; text-align: center; margin: 4px 0; }
+
+  /* Loading overlay */
+  .loading { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.85); align-items: center; justify-content: center; flex-direction: column; gap: 12px; z-index: 999; }
+  .loading.active { display: flex; }
+  .spinner { width: 36px; height: 36px; border: 3px solid #eee; border-top-color: #1a1a2e; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .step-indicator { display: flex; justify-content: center; gap: 6px; padding: 10px; }
+  .step-dot { width: 6px; height: 6px; border-radius: 50%; background: #ddd; transition: all 0.3s; }
+  .step-dot.active { background: #1a1a2e; width: 18px; border-radius: 3px; }
+  .step-dot.done { background: #3b6d11; }
+</style>
+</head>
+<body>
+
+<div class="loading" id="loadingOverlay">
+  <div class="spinner"></div>
+  <span style="font-size:13px;color:#888">Submitting your application...</span>
+</div>
+
+<div class="phone">
+  <div class="status-bar">
+    <span>9:41</span>
+    <span>quickrupee.in 🔒</span>
+    <span>4G ▌▌▌</span>
+  </div>
+
+  <!-- MAIN APPLICATION SCREEN -->
+  <div id="mainScreen">
+    <div class="app-header">
+      <div class="logo">QR</div>
+      <div>
+        <div class="app-name">QuickRupee</div>
+        <div class="app-sub">Personal Loan Application</div>
+      </div>
+      <span class="badge-rbi">RBI Registered</span>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-label">Step 1 of 3 — Loan details</div>
+      <div class="progress-track"><div class="progress-fill" style="width:33%"></div></div>
+    </div>
+
+    <!-- KFS Upfront -->
+    <div class="kfs-box">
+      <div class="kfs-title">Key Fact Statement (KFS) — RBI Directions 2025</div>
+      <div class="kfs-row"><span class="kfs-label">Annual Percentage Rate (APR)</span><span class="kfs-value">24% p.a.</span></div>
+      <div class="kfs-row"><span class="kfs-label">Processing fee</span><span class="kfs-value">₹500 (upfront)</span></div>
+      <div class="kfs-row"><span class="kfs-label">Loan tenure</span><span class="kfs-value">3 – 24 months</span></div>
+      <div class="kfs-row"><span class="kfs-label">Prepayment charges</span><span class="kfs-value">Nil</span></div>
+      <div class="cooling">ℹ️ Cooling-off period: You may cancel this loan within 3 days of disbursement with no penalty — as per RBI Digital Lending Directions, 2025.</div>
+    </div>
+
+    <!-- Loan Amount -->
+    <div class="section">
+      <div class="section-title">How much do you need to borrow?</div>
+      <div class="amount-display" id="amountDisplay">₹20,000</div>
+      <input type="range" id="loanSlider" min="10000" max="100000" step="5000" value="20000" oninput="updateLoan()">
+      <div class="range-labels"><span>₹10,000</span><span>₹1,00,000</span></div>
+      <div class="helper">Adjust this slider to match your actual need. You are not required to borrow the maximum amount.</div>
+    </div>
+
+    <!-- Tenure -->
+    <div class="section">
+      <div class="section-title">Choose repayment tenure</div>
+      <div class="tenure-grid">
+        <div class="tenure-opt" onclick="selectTenure(this,3)">3 months</div>
+        <div class="tenure-opt selected" onclick="selectTenure(this,12)">12 months</div>
+        <div class="tenure-opt" onclick="selectTenure(this,18)">18 months</div>
+        <div class="tenure-opt" onclick="selectTenure(this,24)">24 months</div>
+      </div>
+    </div>
+
+    <!-- Cost summary -->
+    <div class="cost-box">
+      <div class="section-title" style="margin-bottom:8px">Your complete cost summary</div>
+      <div class="cost-row"><span class="cost-label">Principal amount</span><span class="cost-value" id="c-principal">₹20,000</span></div>
+      <div class="cost-row"><span class="cost-label">Annual Percentage Rate</span><span class="cost-value">24% p.a.</span></div>
+      <div class="cost-row"><span class="cost-label">Processing fee (one-time)</span><span class="cost-value">₹500</span></div>
+      <div class="cost-row"><span class="cost-label">Monthly EMI</span><span class="cost-value" id="c-emi">₹1,858</span></div>
+      <div class="cost-row"><span class="cost-label">Total repayment amount</span><span class="cost-value" id="c-total">₹22,796</span></div>
+    </div>
+
+    <!-- Insurance (opt-in) -->
+    <div class="insurance-box">
+      <div class="ins-header">
+        <div class="ins-icon">🛡️</div>
+        <div>
+          <div class="ins-title">Loan protection insurance (optional)</div>
+          <div class="ins-sub">Your choice — does not affect loan approval</div>
+        </div>
+      </div>
+      <div class="ins-price">₹150/month · Covers job loss & hospitalisation</div>
+      <label class="checkbox-row">
+        <input type="checkbox" id="insuranceCheck">
+        <span class="checkbox-label">Yes, add insurance to my application</span>
+      </label>
+      <div class="helper">Leave unchecked if you do not want insurance. This will not affect your eligibility.</div>
+    </div>
+
+    <div class="cta-area">
+      <button class="cta-btn" onclick="goToConfirm()">Review & continue →</button>
+      <div class="cta-note">You may cancel within 3 days of disbursement with no penalty as per RBI regulations.</div>
+    </div>
+  </div>
+
+  <!-- CONFIRMATION SCREEN -->
+  <div class="confirm-screen" id="confirmScreen">
+    <div class="progress-bar" style="text-align:left;padding:10px 0 14px">
+      <div class="progress-label">Step 2 of 3 — Review your application</div>
+      <div class="progress-track"><div class="progress-fill" style="width:66%"></div></div>
+    </div>
+
+    <div class="confirm-icon">📋</div>
+    <div class="confirm-title">Review your application</div>
+    <div class="confirm-sub">Please check all details carefully before submitting. You can go back to make changes.</div>
+
+    <table class="confirm-table">
+      <tr><td>Loan amount</td><td id="rev-amount">₹20,000</td></tr>
+      <tr><td>Repayment tenure</td><td id="rev-tenure">12 months</td></tr>
+      <tr><td>Annual Percentage Rate</td><td>24% p.a.</td></tr>
+      <tr><td>Processing fee</td><td>₹500</td></tr>
+      <tr><td>Monthly EMI</td><td id="rev-emi">₹1,858</td></tr>
+      <tr><td>Total repayment</td><td id="rev-total">₹22,796</td></tr>
+      <tr><td>Loan insurance</td><td id="rev-ins">Not selected</td></tr>
+    </table>
+
+    <div class="section" style="border:none;padding:0 0 16px;text-align:left">
+      <div class="section-title">How confident are you in this decision?</div>
+      <div class="conf-value" id="confValue">5</div>
+      <input type="range" id="confidenceSlider" min="1" max="10" value="5" oninput="document.getElementById('confValue').textContent=this.value" style="width:100%">
+      <div class="conf-label"><span>1 — Not at all</span><span>10 — Very confident</span></div>
+    </div>
+
+    <button class="submit-btn" onclick="submitApplication()">✓ Submit application</button>
+    <button class="cancel-btn" onclick="goBack()">← Go back and edit</button>
+    <div style="font-size:11px;color:#888;margin-top:12px;line-height:1.5">
+      By submitting, you confirm you have read and understood all terms above. Cooling-off period: 3 days after disbursement.
+    </div>
+  </div>
+
+  <!-- SUBMITTED SCREEN -->
+  <div class="submitted-screen" id="submittedScreen">
+    <div class="progress-bar" style="text-align:left;padding:10px 0 14px">
+      <div class="progress-label">Step 3 of 3 — Recall questions</div>
+      <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+    </div>
+    <div class="submitted-icon">✅</div>
+    <div class="submitted-title">Application submitted!</div>
+    <div class="submitted-sub" style="margin-bottom:20px">Thank you. Please answer 3 quick questions below — this is part of the research study.</div>
+
+    <div style="text-align:left">
+      <div class="section" style="border:1px solid #f0f0f0;border-radius:10px;margin-bottom:10px;padding:14px">
+        <div class="section-title">Q1: What was the Annual Percentage Rate (APR) shown?</div>
+        <input type="text" id="recall-apr" placeholder="Type your answer here" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px;margin-top:6px">
+      </div>
+      <div class="section" style="border:1px solid #f0f0f0;border-radius:10px;margin-bottom:10px;padding:14px">
+        <div class="section-title">Q2: What was the processing fee shown?</div>
+        <input type="text" id="recall-fee" placeholder="Type your answer here" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px;margin-top:6px">
+      </div>
+      <div class="section" style="border:1px solid #f0f0f0;border-radius:10px;margin-bottom:10px;padding:14px">
+        <div class="section-title">Q3: Did anything about this interface feel unfair or misleading?</div>
+        <input type="range" id="fairnessSlider" min="1" max="7" value="1" style="width:100%;margin-top:8px">
+        <div class="conf-label"><span>1 — Not at all</span><span>7 — Very much</span></div>
+      </div>
+      <button class="submit-btn" onclick="submitRecall()" style="margin-top:8px">Submit answers & finish</button>
+    </div>
+  </div>
+
+  <!-- THANK YOU -->
+  <div id="thankYouScreen" style="display:none;padding:50px 20px;text-align:center">
+    <div style="font-size:56px;margin-bottom:16px">🙏</div>
+    <div style="font-size:20px;font-weight:700;color:#1a1a2e;margin-bottom:10px">Thank you!</div>
+    <div style="font-size:13px;color:#666;line-height:1.7">Your responses have been recorded.<br>Please proceed to the debrief form sent by the researcher.</div>
+  </div>
+
+</div>
+
+<script>
+// ---- CONFIGURATION ----
+// IMPORTANT: Replace this URL with your Google Apps Script Web App URL after deployment
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbz0qT6KKm_RS0boHj4Is3Ph07jzjvxHVjSIUvFK4WUVqGYOvHmSy2eT8811gV0ufhXgSw/exec";
+const CONDITION = "Control"; // Do NOT change this line
+
+// ---- STATE ----
+let loanAmount = 20000;
+let tenure = 12;
+let insurance = false;
+
+// ---- LOAN CALCULATIONS ----
+function calcEMI(principal, months) {
+  const rate = 0.24 / 12;
+  return Math.round(principal * rate * Math.pow(1+rate,months) / (Math.pow(1+rate,months)-1));
+}
+
+function fmt(n) {
+  return '₹' + n.toLocaleString('en-IN');
+}
+
+function updateLoan() {
+  loanAmount = parseInt(document.getElementById('loanSlider').value);
+  const emi = calcEMI(loanAmount, tenure);
+  const total = emi * tenure + 500;
+
+  document.getElementById('amountDisplay').textContent = fmt(loanAmount);
+  document.getElementById('c-principal').textContent = fmt(loanAmount);
+  document.getElementById('c-emi').textContent = fmt(emi);
+  document.getElementById('c-total').textContent = fmt(total);
+}
+
+function selectTenure(el, months) {
+  document.querySelectorAll('.tenure-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  tenure = months;
+  updateLoan();
+}
+
+// ---- NAVIGATION ----
+function goToConfirm() {
+  insurance = document.getElementById('insuranceCheck').checked;
+  const emi = calcEMI(loanAmount, tenure);
+  const total = emi * tenure + 500;
+
+  document.getElementById('rev-amount').textContent = fmt(loanAmount);
+  document.getElementById('rev-tenure').textContent = tenure + ' months';
+  document.getElementById('rev-emi').textContent = fmt(emi);
+  document.getElementById('rev-total').textContent = fmt(total);
+  document.getElementById('rev-ins').textContent = insurance ? 'Yes — ₹150/month' : 'Not selected';
+
+  document.getElementById('mainScreen').style.display = 'none';
+  document.getElementById('confirmScreen').style.display = 'block';
+  window.scrollTo(0,0);
+}
+
+function goBack() {
+  document.getElementById('confirmScreen').style.display = 'none';
+  document.getElementById('mainScreen').style.display = 'block';
+  window.scrollTo(0,0);
+}
+
+function submitApplication() {
+  document.getElementById('confirmScreen').style.display = 'none';
+  document.getElementById('submittedScreen').style.display = 'block';
+  window.scrollTo(0,0);
+}
+
+// ---- FINAL SUBMISSION TO GOOGLE SHEETS ----
+function submitRecall() {
+  const confidence = document.getElementById('confidenceSlider').value;
+  const recallAPR = document.getElementById('recall-apr').value.trim();
+  const recallFee = document.getElementById('recall-fee').value.trim();
+  const fairness = document.getElementById('fairnessSlider').value;
+  const emi = calcEMI(loanAmount, tenure);
+  const total = emi * tenure + 500;
+
+  if (!recallAPR || !recallFee) {
+    alert('Please answer both recall questions before submitting.');
+    return;
+  }
+
+  // Score recall accuracy
+  const aprCorrect = recallAPR.includes('24') ? 'Correct' : 'Incorrect';
+  const feeCorrect = recallFee.includes('500') ? 'Correct' : 'Incorrect';
+
+  const payload = {
+    timestamp: new Date().toISOString(),
+    condition: CONDITION,
+    loanAmountRequested: loanAmount,
+    overborrowingAmount: loanAmount - 20000,
+    tenureSelected: tenure,
+    insuranceAdded: insurance ? 'Yes' : 'No',
+    emiAmount: emi,
+    totalRepayment: total,
+    decisionConfidence: confidence,
+    recallAPR: recallAPR,
+    recallAPRCorrect: aprCorrect,
+    recallFee: recallFee,
+    recallFeeCorrect: feeCorrect,
+    perceivedFairness: fairness,
+    participantId: 'P_' + Date.now()
+  };
+
+  document.getElementById('loadingOverlay').classList.add('active');
+
+  if (SHEET_URL === "https://script.google.com/macros/s/AKfycbwxeOVXLlRfXN_rtVUSkl3LblgVecT1rMTQImAyIz7wdpE4CltS1Y0d310yFCso4NIh/exec") {
+    // Demo mode — show data in console if URL not set
+    console.log("DATA TO RECORD:", payload);
+    setTimeout(() => {
+      document.getElementById('loadingOverlay').classList.remove('active');
+      document.getElementById('submittedScreen').style.display = 'none';
+      document.getElementById('thankYouScreen').style.display = 'block';
+      window.scrollTo(0,0);
+    }, 1200);
+    return;
+  }
+
+  fetch(SHEET_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).finally(() => {
+    document.getElementById('loadingOverlay').classList.remove('active');
+    document.getElementById('submittedScreen').style.display = 'none';
+    document.getElementById('thankYouScreen').style.display = 'block';
+    window.scrollTo(0,0);
+  });
+}
+
+// Init
+updateLoan();
+</script>
+</body>
+</html>
